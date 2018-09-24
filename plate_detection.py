@@ -6,7 +6,7 @@ from PIL import Image
 import pytesseract
 
 # Read the image file
-original_img = cv2.imread('images/seat_back.jpg')
+original_img = cv2.imread('images/renault_back.jpg')
 cv2.imshow('ooo', original_img)
 original_img_height, original_img_width = original_img.shape[:2]
 #original_img = image
@@ -69,33 +69,31 @@ cv2.polylines(image, np.int32(points), True, (122, 122, 122))
 
 #print("Puntos: {}".format(points))
 rect = cv2.boundingRect(np.int32(points)) # returns (x,y,w,h) of the rect
-# rect[0] *= width_ratio
-# rect[2] *= width_ratio
-# rect[1] *= height_ratio
-# rect[3] *= height_ratio
+plate_x = int(rect[0]*width_ratio)
+plate_w = int(rect[2]*width_ratio)
+plate_y = int(rect[1]*height_ratio)
+plate_h = int(rect[3]*height_ratio)
 print("Caja. {}".format(rect))
 # TODO: 
-cropped = original_img[int(rect[1]*height_ratio): int((rect[1] + rect[3])*height_ratio), 
-                    int(rect[0]*width_ratio): int((rect[0] + rect[2])*width_ratio)]
-print(cropped, cropped.shape[:2])
+cropped = original_img[plate_y:plate_y+plate_h, plate_x:plate_x+plate_w]
+# cropped = original_img[int(rect[1]*height_ratio): int((rect[1] + rect[3])*height_ratio), 
+#                     int(rect[0]*width_ratio): int((rect[0] + rect[2])*width_ratio)]
 
 cv2.imshow("orig" , original_img)
-cv2.imshow("same size" , res)
+#cv2.imshow("same size" , res)
 
 ## Pass the plate through tesseract to perform recognition
 #cropped = imutils.resize(cropped, width=320)
 #cropped = cv2.resize(cropped, (320, 320))
 cv2.imshow("cropped" , cropped)
 
-img = Image.fromarray(cropped)
-print("Recognition. {}".format(tesserocr.image_to_text(img)))
-print("Recognition. {}".format(pytesseract.image_to_string(cropped)))
-
 print("Without preprocessing: ")
 img = Image.fromarray(cropped)
-print("Recognition. {}".format(tesserocr.image_to_text(img)))
+print("TesserOCR: {}".format(tesserocr.image_to_text(img)))
 print("Pytesseract: {}".format(pytesseract.image_to_string(cropped)))
 print("With preprocessing: ")
+cropped = original_img[int(plate_y-0.005*original_img_height):int(plate_y+plate_h+0.005*image_height), 
+                    int(plate_x-0.005*original_img_width):int(plate_x+plate_w+0.005*original_img_width)]
 crop = cv2.cvtColor(cropped, cv2.COLOR_BGR2GRAY)
 #image = cv2.resize(image, (640, -1), interpolation=cv2.INTER_CUBIC)
 #image = cv2.resize(image, (0, 0), fx=3, fy=3, interpolation=cv2.INTER_CUBIC) # INTER_AREA to decrease
@@ -103,8 +101,8 @@ crop = cv2.bilateralFilter(crop, 11, 17, 17)
 crop = cv2.threshold(crop, 0, 255,cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
 
 img = Image.fromarray(cropped)
+print("TesserOCR: {}".format(tesserocr.image_to_text(img)))
 print("Pytesseract: {}".format(pytesseract.image_to_string(crop)))
-print("OCR: {}".format(tesserocr.image_to_text(img)))  # print ocr text from image
 
 cv2.imshow("cropped_processed" , crop)
 cv2.waitKey(0) #Wait for user input before closing the images displayed

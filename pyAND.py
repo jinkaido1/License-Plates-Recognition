@@ -9,6 +9,34 @@ import pytesseract
 import tesserocr
 from PIL import Image
 
+def plate_recognition(plate):
+	"""Performs OCR with Tesseract to a plate image.
+
+	Args:
+		plate (nparray): License plate cropped from an image (OpenCV).
+	
+	Returns:
+		plate_text (str): Text that Tesseract's been able to detect.
+
+	"""
+	cv2.destroyAllWindows()
+	print("Without preprocessing: ")
+	cv2.imshow('Plate', plate)
+	print("Pytesseract: {}".format(pytesseract.image_to_string(plate)))
+	img = Image.fromarray(plate)
+	print("OCR: {}".format(tesserocr.image_to_text(img)))  # print ocr text from image
+
+	print("With preprocessing: ")
+	image = cv2.cvtColor(plate, cv2.COLOR_BGR2GRAY)
+	#image = cv2.resize(image, (640, -1), interpolation=cv2.INTER_CUBIC)
+	#image = cv2.resize(image, (0, 0), fx=3, fy=3, interpolation=cv2.INTER_CUBIC) # INTER_AREA to decrease
+	image = cv2.bilateralFilter(image, 11, 17, 17)
+	image = cv2.threshold(image, 0, 255,cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
+	cv2.imshow('Processed Plate', image)
+	print("Pytesseract: {}".format(pytesseract.image_to_string(image)))
+	img = Image.fromarray(image)
+	print("OCR: {}".format(tesserocr.image_to_text(img)))
+	cv2.waitKey(0)
 
 def validate_contour(contour, img, aspect_ratio_range, area_range):
     rect = cv2.minAreaRect(contour)
@@ -70,7 +98,9 @@ def process_image(name, debug, **options):
 		se_shape = (7,6)
 
 	raw_image = cv2.imread(name,1)
-	input_image = raw_image
+	#input_image = raw_image
+	input_image = cv2.resize(raw_image, (640, 640)) 
+	cv2.imshow('res', input_image)
 
 	gray = cv2.cvtColor(input_image, cv2.COLOR_BGR2GRAY)
 	gray = enhance(gray)
@@ -152,7 +182,7 @@ def process_image(name, debug, **options):
 				crop_y = bounding_box[1]
 				crop_w = bounding_box[2]
 				crop_h = bounding_box[3]
-				print(box, bounding_box)
+				#print(box, bounding_box)
 				plate = raw_image[crop_y:crop_y+crop_h, crop_x:crop_x+crop_w]
 				M = cv2.getRotationMatrix2D((size[0]/2, size[1]/2), angle, 1.0)
 				plate = cv2.getRectSubPix(raw_image, size, center)
@@ -172,8 +202,10 @@ def process_image(name, debug, **options):
 			# plate = input_image[crop_y:crop_y+crop_h, crop_x:crop_x+crop_w]
 			# cv2.imshow('Crop', plate)
 
-	return input_image, plate
+		if 'plate' not in locals():
+			plate=None
 
+	return input_image, plate
 
 if len(sys.argv) < 2:
 	print('usage:\n python pyANPD.py <image_file_path>')
@@ -191,22 +223,23 @@ cv2.waitKey(0)
 print('Time taken: %d ms'%((time.time()-t1)*1000))
 
 # Recognition
-cv2.destroyAllWindows()
-print("Without preprocessing: ")
-cv2.imshow('Plate', plate)
-print("Pytesseract: {}".format(pytesseract.image_to_string(plate)))
-img = Image.fromarray(plate)
-print("OCR: {}".format(tesserocr.image_to_text(img)))  # print ocr text from image
+plate_recognition(plate)
+# cv2.destroyAllWindows()
+# print("Without preprocessing: ")
+# cv2.imshow('Plate', plate)
+# print("Pytesseract: {}".format(pytesseract.image_to_string(plate)))
+# img = Image.fromarray(plate)
+# print("OCR: {}".format(tesserocr.image_to_text(img)))  # print ocr text from image
 
-print("With preprocessing: ")
-image = cv2.cvtColor(plate, cv2.COLOR_BGR2GRAY)
-#image = cv2.resize(image, (640, -1), interpolation=cv2.INTER_CUBIC)
-#image = cv2.resize(image, (0, 0), fx=3, fy=3, interpolation=cv2.INTER_CUBIC) # INTER_AREA to decrease
-image = cv2.bilateralFilter(image, 11, 17, 17)
-image = cv2.threshold(image, 0, 255,cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
-cv2.imshow('Processed Plate', image)
-print("Pytesseract: {}".format(pytesseract.image_to_string(image)))
-img = Image.fromarray(image)
-print("OCR: {}".format(tesserocr.image_to_text(img)))
-cv2.waitKey(0)
+# print("With preprocessing: ")
+# image = cv2.cvtColor(plate, cv2.COLOR_BGR2GRAY)
+# #image = cv2.resize(image, (640, -1), interpolation=cv2.INTER_CUBIC)
+# #image = cv2.resize(image, (0, 0), fx=3, fy=3, interpolation=cv2.INTER_CUBIC) # INTER_AREA to decrease
+# image = cv2.bilateralFilter(image, 11, 17, 17)
+# image = cv2.threshold(image, 0, 255,cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
+# cv2.imshow('Processed Plate', image)
+# print("Pytesseract: {}".format(pytesseract.image_to_string(image)))
+# img = Image.fromarray(image)
+# print("OCR: {}".format(tesserocr.image_to_text(img)))
+# cv2.waitKey(0)
 

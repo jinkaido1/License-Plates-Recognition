@@ -147,31 +147,31 @@ for i, function in enumerate(functions):
     drawPolygons(drawOn, drawpolys, ratioWidth, ratioHeight, (0, 255, 0), 2)
 
     ############## Lo mío ################
-    print(polygons[32], indicies, ratioHeight, ratioWidth, offsets[32], thetas[32])
+    # print(polygons[32], indicies, ratioHeight, ratioWidth, offsets[32], thetas[32])
 
 
-    mask = np.zeros((origHeight, origWidth), dtype=np.uint8)
-    points = np.array([polygons[32]])
-    print(points, type(points))
-    cv2.fillPoly(mask, np.int32(points), (255))
+    # mask = np.zeros((origHeight, origWidth), dtype=np.uint8)
+    # points = np.array([polygons[32]])
+    # print(points, type(points))
+    # cv2.fillPoly(mask, np.int32(points), (255))
 
-    res = cv2.bitwise_and(orig,orig,mask = mask)
-    #cv2.rectangle(img,(384,0),(510,128),(0,255,0),3)
-    cv2.polylines(res, np.int32(points), True, (122, 122, 122))
+    # res = cv2.bitwise_and(orig,orig,mask = mask)
+    # #cv2.rectangle(img,(384,0),(510,128),(0,255,0),3)
+    # cv2.polylines(res, np.int32(points), True, (122, 122, 122))
 
-    rect = cv2.boundingRect(np.int32(points)) # returns (x,y,w,h) of the rect
-    cropped = res[rect[1]: rect[1] + rect[3], rect[0]: rect[0] + rect[2]]
-    print(cropped)
+    # rect = cv2.boundingRect(np.int32(points)) # returns (x,y,w,h) of the rect
+    # cropped = res[rect[1]: rect[1] + rect[3], rect[0]: rect[0] + rect[2]]
+    # print(cropped)
 
-    #cv2.imshow("cropped" , cropped )
-    cv2.imshow("same size" , res)
+    # #cv2.imshow("cropped" , cropped )
+    # cv2.imshow("same size" , res)
 
-    # print(points.max)
-    # M = cv2.getRotationMatrix2D((int(offsets[32][0]),int(offsets[32][1])),10,1)
-    # dst = cv2.warpAffine(res,M,(int(offsets[32][0]),int(offsets[32][1])))
-    M = cv2.getRotationMatrix2D((int(100),int(100)),-np.rad2deg(thetas[32]),1)
-    dst = cv2.warpAffine(res,M,(int(100),int(100)))
-    cv2.imshow("Test" , dst)
+    # # print(points.max)
+    # # M = cv2.getRotationMatrix2D((int(offsets[32][0]),int(offsets[32][1])),10,1)
+    # # dst = cv2.warpAffine(res,M,(int(offsets[32][0]),int(offsets[32][1])))
+    # M = cv2.getRotationMatrix2D((int(100),int(100)),-np.rad2deg(thetas[32]),1)
+    # dst = cv2.warpAffine(res,M,(int(100),int(100)))
+    # cv2.imshow("Test" , dst)
 
 
 
